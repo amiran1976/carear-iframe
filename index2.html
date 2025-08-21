@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title id="doc-title">CareAR</title>
+  <meta http-equiv="Cache-Control" content="no-store, max-age=0" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+           max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
+    .meta { color: #666; font-size: .9rem; margin-top: .75rem; }
+    #msg { line-height: 1.5; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="msg">Loading…</div>
+    <div class="meta" id="updated"></div>
+  </div>
+
+  <script>
+    // Always fetch the newest data.json
+    fetch('public/data.json?v=' + Date.now())
+      .then(async (res) => {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const d = await res.json();
+
+        const name = (d.name ?? '').toString();
+        const updatedAt = (d.updatedAt ?? new Date().toISOString()).toString();
+
+        // Build the exact 4-line message (no HTML injection)
+        const lines = [
+          `Hello, ${name},`,
+          'Here is your new selfie.',
+          'Thank you,',
+          'The CareAR team'
+        ];
+        document.getElementById('msg').textContent = lines.join('\n');
+        document.getElementById('updated').textContent = 'Last updated: ' + updatedAt;
+      })
+      .catch(err => {
+        document.getElementById('msg').textContent = 'Failed to load data.json: ' + err.message;
+      });
+  </script>
+</body>
+</html>
