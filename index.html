@@ -1,10 +1,52 @@
 <!doctype html>
-<html>
-  <head><meta charset="utf-8"><title>{{title}}</title></head>
-  <body style="font-family:system-ui;max-width:720px;margin:2rem auto;padding:0 1rem">
-    <h1>{{title}}</h1>
-    <img src="/public/latest.jpg?v={{formatDate(now; "HHmmss")}}" alt="" style="max-width:100%;height:auto">
-    <p>{{bodyText}}</p>
-    <small>Updated: {{formatDate(now; "yyyy-MM-dd HH:mm:ss")}}</small>
-  </body>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title id="doc-title">CareAR</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+           max-width: 720px; margin: 2rem auto; padding: 0 1rem; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
+    .meta { color: #666; font-size: .9rem; margin-top: .75rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div id="msg" style="line-height:1.5"></div>
+    <div class="meta" id="updated"></div>
+  </div>
+
+  <script>
+    // Always fetch the latest JSON (cache-busted)
+    const url = 'public/data.json?v=' + Date.now();
+
+    fetch(url).then(async (res) => {
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' loading data.json');
+      const d = await res.json();
+
+      const name = (d.name ?? '').toString();          // <-- your webhook field, saved in JSON as "name"
+      const updatedAt = (d.updatedAt ?? new Date().toISOString()).toString();
+
+      // Build the exact 4-line message, safely (no HTML injection)
+      const msg = document.getElementById('msg');
+      const br = () => document.createElement('br');
+
+      msg.textContent = ''; // clear
+      msg.append('Hello, ', name, ',');                // line 1
+      msg.append(br());
+      msg.append('Here is your new selfie.');          // line 2
+      msg.append(br());
+      msg.append('Thank you,');                        // line 3
+      msg.append(br());
+      msg.append('The CareAR team');                   // line 4
+
+      document.getElementById('doc-title').textContent = 'CareAR';
+      document.getElementById('updated').textContent = 'Last updated: ' + updatedAt;
+    }).catch(err => {
+      document.querySelector('.card').textContent = 'Failed to load data.json: ' + err.message;
+    });
+  </script>
+</body>
 </html>
